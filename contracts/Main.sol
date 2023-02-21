@@ -24,8 +24,15 @@ contract MyERC3525 is ERC3525, Ownable {
     }
 
     struct ProjectInfo {
-        uint hasRecivedAmount;
+        uint hasInvestedAmount;
+        uint hasTotalAmount;
         uint waittingReciviedCap;
+    }
+
+    struct InvestInfo {
+        address investor;
+        uint investAmount;
+        uint proportion;
     }
 
     struct WithdrewHistory {
@@ -39,16 +46,17 @@ contract MyERC3525 is ERC3525, Ownable {
     ProjectInfo public projectInfo;
     WithdrewHistory[] public withdrewHistory;
 
-    mapping(address => uint) public investorAmount;
+    address[] allInvestors;
+    mapping(address => uint) public investorsAmount;
     mapping(address => uint) public whiteCanInverstAmout;
 
     function setWhiteCanInverstAmouts(
-        address[] memory investors,
-        uint[] memory amounts
+        address[] memory investors_,
+        uint[] memory amounts_
     ) external onlyOwner {
-        require(investors.length == amounts.length, "Err_Length_Not_Equal");
-        for (uint i = 0; i < investors.length; i++) {
-            whiteCanInverstAmout[investors[i]] = amounts[i];
+        require(investors_.length == amounts_.length, "Err_Length_Not_Equal");
+        for (uint i = 0; i < investors_.length; i++) {
+            whiteCanInverstAmout[investors_[i]] = amounts_[i];
         }
     }
 
@@ -64,29 +72,70 @@ contract MyERC3525 is ERC3525, Ownable {
 
         _mint(msg.sender, 1, value);
 
-        investorAmount[msg.sender] += value;
+        investorsAmount[msg.sender] += value;
+        projectInfo.hasInvestedAmount += msg.value;
 
         if (rights.isWhitelisted) whiteCanInverstAmout[msg.sender] -= value;
         if (rights.isCap)
             require(
-                (value += projectInfo.hasRecivedAmount) <=
+                (value += projectInfo.hasInvestedAmount) <=
                     projectInfo.waittingReciviedCap,
                 "Err_Project_Overflow_Cap"
             );
+        if (_arrInAddresses(allInvestors, msg.sender) == false) {
+            allInvestors.push(msg.sender);
+        }
+    }
+
+    function queryInvestorInfo(
+        address investor_
+    ) public view returns (InvestInfo memory investInfo) {
+        investInfo.investor = investor_;
+        investInfo.investAmount = investorsAmount[investor_];
+        investInfo.proportion =
+            (investInfo.investAmount * 10e18) /
+            projectInfo.hasInvestedAmount;
+    }
+
+    function queryAllInvestorInfo()
+        external
+        view
+        returns (InvestInfo[] memory allInvestInfo)
+    {
+        for (uint i = 0; i < allInvestors.length; i++) {
+            allInvestInfo[i] = queryInvestorInfo(allInvestors[i]);
+        }
+    }
+
+    function _arrInAddresses(
+        address[] memory addresses,
+        address check
+    ) internal pure returns (bool) {
+        for (uint i = 0; i < addresses.length; i++) {
+            if (addresses[i] == check) return true;
+        }
+        return false;
     }
 
     function setRigthsIsLock(bool isLock_) external onlyOwner {
         rights.isLock = isLock_;
     }
 
-    receive() external payable {
-        projectInfo.hasRecivedAmount += msg.value;
+    function bonus(uint bonusAmount) external payable {
+        for (uint i = 0; i < allInvestors.length; i++) {
+            InvestInfo memory one = queryInvestorInfo(allInvestors[i]);
+            _withdraw(allInvestors[i], (bonusAmount * one.proportion) / 10e18);
+        }
     }
 
     function withdraw(
         address receiver,
         uint amount
     ) external payable onlyOwner {
+        _withdraw(receiver, amount);
+    }
+
+    function _withdraw(address receiver, uint amount) internal {
         (bool success, ) = payable(receiver).call{value: amount}("");
 
         withdrewHistory.push(
@@ -98,6 +147,11 @@ contract MyERC3525 is ERC3525, Ownable {
             })
         );
 
+        projectInfo.hasTotalAmount -= amount;
         require(success);
+    }
+
+    receive() external payable {
+        projectInfo.hasTotalAmount += msg.value;
     }
 }
