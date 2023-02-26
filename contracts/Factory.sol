@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Factory is Ownable {
     mapping(address => bool) public isBusiness;
 
-    function newDimensionX(
+    function newBusiness(
         bool isWhitelisted_,
         bool isLock_,
         bool isCap_
