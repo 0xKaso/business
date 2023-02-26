@@ -2,7 +2,7 @@
 pragma solidity ^0.8.12;
 
 // Uncomment this line to use console.log
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 import "./@solvprotocol/erc-3525/ERC3525.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -46,7 +46,7 @@ contract Business is ERC3525, Ownable {
     ProjectInfo public projectInfo;
     WithdrewHistory[] public withdrewHistory;
 
-    address[] allInvestors;
+    address[] public allInvestors;
     mapping(address => uint) public investorsAmount;
     mapping(address => uint) public whiteCanInverstAmout;
 
@@ -72,13 +72,12 @@ contract Business is ERC3525, Ownable {
 
         _mint(msg.sender, 1, value);
 
-        investorsAmount[msg.sender] += value;
         projectInfo.hasInvestedAmount += msg.value;
 
         if (rights.isWhitelisted) whiteCanInverstAmout[msg.sender] -= value;
         if (rights.isCap)
             require(
-                (value += projectInfo.hasInvestedAmount) <=
+                (value + projectInfo.hasInvestedAmount) <=
                     projectInfo.waittingReciviedCap,
                 "Err_Project_Overflow_Cap"
             );
@@ -92,19 +91,23 @@ contract Business is ERC3525, Ownable {
     ) public view returns (InvestInfo memory investInfo) {
         investInfo.investor = investor_;
         investInfo.investAmount = investorsAmount[investor_];
-        investInfo.proportion =
-            (investInfo.investAmount * 10e18) /
-            projectInfo.hasInvestedAmount;
+        investInfo.proportion = uint(
+            (investorsAmount[investor_] * 10e18) / projectInfo.hasInvestedAmount
+        );
     }
 
     function queryAllInvestorInfo()
         external
         view
-        returns (InvestInfo[] memory allInvestInfo)
+        returns (InvestInfo[] memory)
     {
-        for (uint i = 0; i < allInvestors.length; i++) {
+        uint len = allInvestors.length;
+        InvestInfo[] memory allInvestInfo = new InvestInfo[](len);
+        for (uint i; i < len; i++) {
             allInvestInfo[i] = queryInvestorInfo(allInvestors[i]);
         }
+
+        return allInvestInfo;
     }
 
     function _arrInAddresses(
@@ -121,7 +124,7 @@ contract Business is ERC3525, Ownable {
         rights.isLock = isLock_;
     }
 
-    function bonus(uint bonusAmount) external payable {
+    function bonus(uint bonusAmount) external payable onlyOwner { 
         for (uint i = 0; i < allInvestors.length; i++) {
             InvestInfo memory one = queryInvestorInfo(allInvestors[i]);
             _withdraw(allInvestors[i], (bonusAmount * one.proportion) / 10e18);
