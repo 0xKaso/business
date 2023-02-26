@@ -6,7 +6,7 @@ pragma solidity ^0.8.12;
 import "./@solvprotocol/erc-3525/ERC3525.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyERC3525 is ERC3525, Ownable {
+contract Business is ERC3525, Ownable {
     constructor(
         bool isWhitelisted_,
         bool isLock_,
@@ -158,8 +158,8 @@ contract MyERC3525 is ERC3525, Ownable {
         uint256 toTokenId_,
         uint256 slot_,
         uint256 value_
-    ) internal virtual override{
-        investorsAmount[from_] -= value_;
+    ) internal virtual override {
+        if (investorsAmount[from_] != 0) investorsAmount[from_] -= value_;
         investorsAmount[to_] += value_;
     }
 

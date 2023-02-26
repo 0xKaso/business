@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('@nomiclabs/hardhat-etherscan')
 require("hardhat-contract-sizer");
-require("hardhat-gas-reporter");
+// require("hardhat-gas-reporter");
 require("solidity-coverage")
 require("dotenv/config")
 
@@ -22,11 +22,11 @@ module.exports = {
     strict: false,
     only: [""],
   },
-  gasReporter: {
-    currency: "CHF",
-    gasPrice: 21,
-    enabled: true,
-  },
+  // gasReporter: {
+  //   currency: "CHF",
+  //   gasPrice: 21,
+  //   enabled: true,
+  // },
   networks: {
     // forking: {
     //   url: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",

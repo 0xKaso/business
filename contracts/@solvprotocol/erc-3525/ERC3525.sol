@@ -48,12 +48,12 @@ contract ERC3525 is Context, IERC3525Metadata, IERC721Enumerable {
     // @dev _approvedValues cannot be defined within TokenData, cause struct containing mappings cannot be constructed.
     mapping(uint256 => mapping(address => uint256)) private _approvedValues;
 
-    TokenData[] internal _allTokens;
+    TokenData[] private _allTokens;
 
     // key: id
-    mapping(uint256 => uint256) internal _allTokensIndex;
+    mapping(uint256 => uint256) private _allTokensIndex;
 
-    mapping(address => AddressData) internal _addressData;
+    mapping(address => AddressData) private _addressData;
 
     IERC3525MetadataDescriptor public metadataDescriptor;
 
