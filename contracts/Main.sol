@@ -3,7 +3,7 @@ pragma solidity ^0.8.12;
 
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
-import "@solvprotocol/erc-3525/ERC3525.sol";
+import "./@solvprotocol/erc-3525/ERC3525.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MyERC3525 is ERC3525, Ownable {
@@ -149,6 +149,18 @@ contract MyERC3525 is ERC3525, Ownable {
 
         projectInfo.hasTotalAmount -= amount;
         require(success);
+    }
+
+    function _afterValueTransfer(
+        address from_,
+        address to_,
+        uint256 fromTokenId_,
+        uint256 toTokenId_,
+        uint256 slot_,
+        uint256 value_
+    ) internal virtual override{
+        investorsAmount[from_] -= value_;
+        investorsAmount[to_] += value_;
     }
 
     receive() external payable {
