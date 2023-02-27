@@ -33,6 +33,15 @@ describe("business dynamics", function (accounts) {
         expect(e.message).include("Ownable: caller is not the owner");
       });
 
+    await Business.connect(Signers[0])
+      .setWhiteCanInverstAmouts(
+        [Signers[1].address, Signers[2].address, Signers[3].address],
+        [1000, 2000]
+      )
+      .catch((e) => {
+        expect(e.message).include("Err_Length_Not_Equal");
+      });
+
     await Business.setWhiteCanInverstAmouts(
       [Signers[1].address, Signers[2].address, Signers[3].address],
       [1000, 2000, 3000]
