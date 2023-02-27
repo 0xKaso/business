@@ -72,8 +72,6 @@ contract Business is ERC3525, Ownable {
 
         _mint(msg.sender, 1, value);
 
-        projectInfo.hasInvestedAmount += msg.value;
-
         if (rights.isWhitelisted) whiteCanInverstAmout[msg.sender] -= value;
         if (rights.isCap)
             require(
@@ -84,6 +82,8 @@ contract Business is ERC3525, Ownable {
         if (_arrInAddresses(allInvestors, msg.sender) == false) {
             allInvestors.push(msg.sender);
         }
+
+        projectInfo.hasInvestedAmount += msg.value;
     }
 
     function queryInvestorInfo(
@@ -120,11 +120,11 @@ contract Business is ERC3525, Ownable {
         return false;
     }
 
-    function setRigthsIsLock(bool isLock_) external onlyOwner {
+    function setRightsIsLock(bool isLock_) external onlyOwner {
         rights.isLock = isLock_;
     }
 
-    function bonus(uint bonusAmount) external payable onlyOwner { 
+    function bonus(uint bonusAmount) external payable onlyOwner {
         for (uint i = 0; i < allInvestors.length; i++) {
             InvestInfo memory one = queryInvestorInfo(allInvestors[i]);
             _withdraw(allInvestors[i], (bonusAmount * one.proportion) / 10e18);
@@ -139,7 +139,7 @@ contract Business is ERC3525, Ownable {
     }
 
     function _withdraw(address receiver, uint amount) internal {
-        (bool success, ) = payable(receiver).call{value: amount}("");
+        payable(receiver).call{value: amount}("");
 
         withdrewHistory.push(
             WithdrewHistory({
@@ -151,7 +151,6 @@ contract Business is ERC3525, Ownable {
         );
 
         projectInfo.hasTotalAmount -= amount;
-        require(success);
     }
 
     function _afterValueTransfer(

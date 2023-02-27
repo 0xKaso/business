@@ -85,7 +85,6 @@ describe("business", function (accounts) {
 
     const bSignerBal = await Signers[0].getBalance();
 
-    console.log("🚀 ~ file: Main.js:86 ~ it ~ bSignerBal:", bSignerBal);
     await Business.connect(Signers[1])
       .withdraw(Signers[0].address, 10000)
       .catch(function (err) {
