@@ -11,3 +11,6 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.js
 ```
+
+factory contract address 0xA8A10A438baEF222dc19797fb73389ADd2e8fa9c
+main contract address 0xc5e43a58eacdf98792798e8cd1fd7ddabbee53c6

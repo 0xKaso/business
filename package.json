@@ -3,6 +3,8 @@
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:goerli": "hardhat run scripts/deploy.js --network goerli",
     "local": "hardhat node",
     "cov": "hardhat coverage"
   },
